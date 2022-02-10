@@ -98,6 +98,7 @@ public class UriHashRule {
      * <p>{@code S3}        // Doesn't repeat, HasSubDirectory, CutIndexes=3</p>
      */
     public static UriHashRule fromDesc(final String desc) throws NumberFormatException {
+        Objects.requireNonNull(desc, "empty/null desc");
         int len0 = desc.length();
         boolean repeat = false, hasSubDirectory = false;
         int[] val = new int[0];

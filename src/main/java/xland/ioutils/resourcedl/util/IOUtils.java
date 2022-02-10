@@ -24,4 +24,9 @@ public class IOUtils {
     public interface IORunnable {
         void runIo() throws IOException;
     }
+
+    @FunctionalInterface
+    public interface IOFunction<T, R> {
+        R applyIo(T t) throws IOException;
+    }
 }

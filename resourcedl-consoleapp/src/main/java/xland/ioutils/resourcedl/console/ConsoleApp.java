@@ -15,15 +15,13 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * <h3>Arguments: </h3><ul>
  *   <!--<li>-h / --help</li>-->
  *   <li>-D / --download: <ul>
  *     <li>-r / --root &lt;url&gt;: the root URL of the resource website</li>
- *     <li>-s / --shasum &lt;shasum&gt;</li>
+ *     <li>-s / --hash &lt;hash&gt;</li>
  *     <li>-u / --rule &lt;hashrule&gt;: see {@link UriHashRule#fromDesc(String)},
  *     default is {@link UriHashRule#sha1(boolean, boolean) R2} (Minecraft style)</li>
  *     <li>-o / --output [filename], default {@code &lt;current-time&gt;.file}</li>
@@ -33,7 +31,7 @@ import java.util.function.Supplier;
  *   For example: {@code <pre>
  * mode=download
  * root=https\://featurehouse.github.io/resources/
- * shasum=dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f
+ * hash=dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f
  * rule=S2,4,10
  * output=example.txt
  *   </pre>}
@@ -58,16 +56,16 @@ public class ConsoleApp implements ConsoleRDAppProvider {
             m.put('h', "help");
             m.put('D', "download");
             m.put('r', "root");
-            m.put('s', "shasum");
+            m.put('s', "hash");
             m.put('u', "rule");
             m.put('o', "output");
             unix2gnu = Collections.unmodifiableMap(m);
         }
         public static final String DEFAULT_ACTIVITY = "download";
 
-        static final Map<String, Function<Properties, IOUtils.IORunnable>> ioRunnableMap;
+        static final Map<String, IOUtils.IOFunction<? super Properties, ? extends IOUtils.IORunnable>> ioRunnableMap;
         static {
-            Map<String, Function<Properties, IOUtils.IORunnable>> m = new HashMap<>();
+            Map<String, IOUtils.IOFunction<? super Properties, ? extends IOUtils.IORunnable>> m = new HashMap<>();
             m.put("download", HashedDownload::fromProperties);
 
             ioRunnableMap = Collections.unmodifiableMap(m);
@@ -144,10 +142,10 @@ public class ConsoleApp implements ConsoleRDAppProvider {
             }
         }
 
-        IOUtils.IORunnable parse() {
+        IOUtils.IORunnable parse() throws IOException {
             // default `download` when `mode` is not specified
             return ioRunnableMap.get(properties.getProperty("mode", DEFAULT_ACTIVITY))
-                    .apply(properties);
+                    .applyIo(properties);
         }
 
         static String gnuCtx(String arg) {
@@ -178,12 +176,12 @@ public class ConsoleApp implements ConsoleRDAppProvider {
 
     @Override
     public void launch(String... args) {
-        IOUtils.IORunnable runnable = new ConsoleApp.ArgumentParser(args).parse();
-        LOGGER.info("Preparing to launch {}", runnable);
         try {
+            IOUtils.IORunnable runnable = new ConsoleApp.ArgumentParser(args).parse();
+            LOGGER.info("Preparing to launch {}", runnable);
             runnable.runIo();
-        } catch (IOException e) {
-            LOGGER.error("An unexpected error has occurred", e);
+        } catch (Throwable t) {
+            LOGGER.error("An unexpected error has occurred", t);
         }
     }
 }

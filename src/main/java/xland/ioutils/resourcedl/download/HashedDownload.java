@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -41,9 +42,14 @@ public final class HashedDownload implements IOUtils.IORunnable {
         this.download();
     }
 
-    public static HashedDownload fromProperties(Properties properties) {
-        //TODO
-        throw new UnsupportedOperationException();
+    public static HashedDownload fromProperties(Properties properties)
+            throws IllegalArgumentException, NullPointerException {
+        URI rootUri = URI.create(Objects.requireNonNull(properties.getProperty("root")));
+        Path output = Paths.get(Objects.requireNonNull(properties.getProperty("output")));
+        String hash = properties.getProperty("hash");
+        Objects.requireNonNull(hash);
+        UriHashRule uriHashRule = UriHashRule.fromDesc(properties.getProperty("rule"));
+        return new HashedDownload(rootUri, output, hash, uriHashRule);
     }
 
     public URI rootUri() {
