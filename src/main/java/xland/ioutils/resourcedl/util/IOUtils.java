@@ -19,4 +19,9 @@ public class IOUtils {
         if (Files.exists(path)) throw new FileAlreadyExistsException(path.toString());
         Files.copy(url.openStream(), path);
     }
+
+    @FunctionalInterface
+    public interface IORunnable {
+        void runIo() throws IOException;
+    }
 }

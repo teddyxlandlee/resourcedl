@@ -1,19 +1,21 @@
 plugins {
     java
 }
-
-group = "xland.ioutils"
 version = "0.1.0-SNAPSHOT"
 
 val env: Map<String, String> = System.getenv()
 
-repositories {
-    if (!env.containsKey("MAVEN_CENTRAL_FIRST")) {
-        maven(url = "https://maven.aliyun.com/repository/public") {
-            name = "Aliyun Mirror"
+allprojects {
+    group = "xland.ioutils.resourcedl"
+
+    repositories {
+        if (!env.containsKey("MAVEN_CENTRAL_FIRST")) {
+            maven(url = "https://maven.aliyun.com/repository/public") {
+                name = "Aliyun Mirror"
+            }
         }
+        mavenCentral()
     }
-    mavenCentral()
 }
 
 dependencies {

@@ -9,7 +9,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public final class HashedDownload {
+public final class HashedDownload implements IOUtils.IORunnable {
     private final URI rootUri;
     private final Path output;
     private final String hash;
@@ -33,6 +33,11 @@ public final class HashedDownload {
 
     public void download() throws IOException {
         IOUtils.download(getUrl(), output);
+    }
+
+    @Override
+    public void runIo() throws IOException {
+        this.download();
     }
 
     public URI rootUri() {
