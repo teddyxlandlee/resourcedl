@@ -2,6 +2,7 @@ package xland.ioutils.resourcedl.console;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xland.ioutils.resourcedl.download.HashedDownload;
 import xland.ioutils.resourcedl.download.UriHashRule;
 import xland.ioutils.resourcedl.util.IOUtils;
 import xland.ioutils.resourcedl.util.spi.ConsoleRDAppProvider;
@@ -13,14 +14,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
-import java.util.Hashtable;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * <h3>Arguments: </h3><ul>
+ *   <!--<li>-h / --help</li>-->
  *   <li>-D / --download: <ul>
  *     <li>-r / --root &lt;url&gt;: the root URL of the resource website</li>
  *     <li>-s / --shasum &lt;shasum&gt;</li>
@@ -44,14 +44,38 @@ public class ConsoleApp implements ConsoleRDAppProvider {
     static final Logger LOGGER = LoggerFactory.getLogger("ResourceDL ConsoleApp");
     private static class ArgumentParser {
         transient LinkedHashMap<String, String> map = new LinkedHashMap<>();
+
+        private static final Properties defaultProperties = new Properties(); static {
+            defaultProperties.setProperty("rule", "R2");
+            defaultProperties.setProperty("output", calcTimeFilename());
+        }
+
+        transient final Properties properties = new Properties(defaultProperties);
         final String[] args;
+
         static final Map<Character, String> unix2gnu; static {
             Map<Character, String> m = new Hashtable<>();
-            unix2gnu = null;
+            m.put('h', "help");
+            m.put('D', "download");
+            m.put('r', "root");
+            m.put('s', "shasum");
+            m.put('u', "rule");
+            m.put('o', "output");
+            unix2gnu = Collections.unmodifiableMap(m);
+        }
+        public static final String DEFAULT_ACTIVITY = "download";
+
+        static final Map<String, Function<Properties, IOUtils.IORunnable>> ioRunnableMap;
+        static {
+            Map<String, Function<Properties, IOUtils.IORunnable>> m = new HashMap<>();
+            m.put("download", HashedDownload::fromProperties);
+
+            ioRunnableMap = Collections.unmodifiableMap(m);
         }
 
         ArgumentParser(String... args) {
             this.args = args;
+            readArgs();
         }
 
         void readArgs() {
@@ -60,14 +84,12 @@ public class ConsoleApp implements ConsoleRDAppProvider {
                 try {
                     Path path = Paths.get(args[0]);
                     if (Files.exists(path) && !Files.isDirectory(path)) {
-                        Properties properties = new Properties();
-                        properties.setProperty("rule", "R2");
-                        properties.setProperty("output", calcTimeFilename());
                         properties.load(Files.newBufferedReader(path));
                     }
                 } catch (IOException | InvalidPathException e) {
-
+                    LOGGER.error("Failed to read property from {} because of {}", args[0], e);
                 }
+                return;
             }
 
             int argSize = args.length;
@@ -87,8 +109,29 @@ public class ConsoleApp implements ConsoleRDAppProvider {
                         }
                     case GNU:
                         lastArgument = gnuCtx(arg);
+                        putToMap(lastArgument, null, i);
+                        break;
+                    case UNIX:
+                        int argLen = arg.length();
+                        for (int j = 1; j < argLen; j++) {
+                            char c = arg.charAt(j);
+                            if (unix2gnu.containsKey(c)) {
+                                lastArgument = unix2gnu.get(c);
+                                putToMap(lastArgument, null, i);
+                            } else {
+                                LOGGER.error("Illegal argument at index {}: invalid option `-{}`", i, c);
+                                System.exit(-1);
+                            }
+                        }
+                        break;
                 }
             }
+
+            /* HERE! If arguments are added, edit here */
+            if (map.containsKey("download")) {
+                properties.put("mode", "download");
+            }
+            properties.putAll(map);
         }
 
         private void putToMap(String k, String v, int index) {
@@ -102,7 +145,9 @@ public class ConsoleApp implements ConsoleRDAppProvider {
         }
 
         IOUtils.IORunnable parse() {
-            throw new UnsupportedOperationException();
+            // default `download` when `mode` is not specified
+            return ioRunnableMap.get(properties.getProperty("mode", DEFAULT_ACTIVITY))
+                    .apply(properties);
         }
 
         static String gnuCtx(String arg) {
@@ -133,6 +178,12 @@ public class ConsoleApp implements ConsoleRDAppProvider {
 
     @Override
     public void launch(String... args) {
-
+        IOUtils.IORunnable runnable = new ConsoleApp.ArgumentParser(args).parse();
+        LOGGER.info("Preparing to launch {}", runnable);
+        try {
+            runnable.runIo();
+        } catch (IOException e) {
+            LOGGER.error("An unexpected error has occurred", e);
+        }
     }
 }

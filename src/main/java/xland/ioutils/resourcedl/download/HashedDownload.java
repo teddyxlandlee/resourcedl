@@ -8,6 +8,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.Properties;
 
 public final class HashedDownload implements IOUtils.IORunnable {
     private final URI rootUri;
@@ -38,6 +39,11 @@ public final class HashedDownload implements IOUtils.IORunnable {
     @Override
     public void runIo() throws IOException {
         this.download();
+    }
+
+    public static HashedDownload fromProperties(Properties properties) {
+        //TODO
+        throw new UnsupportedOperationException();
     }
 
     public URI rootUri() {
