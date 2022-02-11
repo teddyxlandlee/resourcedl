@@ -2,6 +2,7 @@ package xland.ioutils.resourcedl.console;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xland.ioutils.resourcedl.console.download.DownloadWrapper;
 import xland.ioutils.resourcedl.download.HashedDownload;
 import xland.ioutils.resourcedl.download.UriHashRule;
 import xland.ioutils.resourcedl.util.IOUtils;
@@ -25,6 +26,8 @@ import java.util.*;
  *     <li>-u / --rule &lt;hashrule&gt;: see {@link UriHashRule#fromDesc(String)},
  *     default is {@link UriHashRule#sha1(boolean, boolean) R2} (Minecraft style)</li>
  *     <li>-o / --output [filename], default {@code &lt;current-time&gt;.file}</li>
+ *     <li>-p / --print: if {@code --output} doesn't exist, just print the URL
+ *     to stdout</li>
  *   </ul></li>
  *   <p>These above can be replaced with:</p>
  *   <li>&lt;path/to/properties&gt;: a properties file that contains all these above.
@@ -45,7 +48,7 @@ public class ConsoleApp implements ConsoleRDAppProvider {
 
         private static final Properties defaultProperties = new Properties(); static {
             defaultProperties.setProperty("rule", "R2");
-            defaultProperties.setProperty("output", calcTimeFilename());
+            //defaultProperties.setProperty("output", calcTimeFilename());
         }
 
         transient final Properties properties = new Properties(defaultProperties);
@@ -59,6 +62,7 @@ public class ConsoleApp implements ConsoleRDAppProvider {
             m.put('s', "hash");
             m.put('u', "rule");
             m.put('o', "output");
+            m.put('p', "print");
             unix2gnu = Collections.unmodifiableMap(m);
         }
         public static final String DEFAULT_ACTIVITY = "download";
@@ -66,7 +70,7 @@ public class ConsoleApp implements ConsoleRDAppProvider {
         static final Map<String, IOUtils.IOFunction<? super Properties, ? extends IOUtils.IORunnable>> ioRunnableMap;
         static {
             Map<String, IOUtils.IOFunction<? super Properties, ? extends IOUtils.IORunnable>> m = new HashMap<>();
-            m.put("download", HashedDownload::fromProperties);
+            m.put("download", DownloadWrapper::get);
 
             ioRunnableMap = Collections.unmodifiableMap(m);
         }
