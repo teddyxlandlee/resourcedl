@@ -9,6 +9,8 @@ import xland.ioutils.resourcedl.util.IOUtils;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -40,6 +42,11 @@ public abstract class DownloadWrapper implements IOUtils.IORunnable {
     private static final class HashedDownloadWrapper extends DownloadWrapper {
         HashedDownloadWrapper(Properties properties) {
             super(properties);
+            if (!properties.containsKey("output")) {
+                properties.setProperty("output", DateTimeFormatter.ISO_DATE_TIME
+                        .format(LocalDateTime.now())
+                        .replace(':', '.').concat(".file"));
+            }
         }
 
         @Override

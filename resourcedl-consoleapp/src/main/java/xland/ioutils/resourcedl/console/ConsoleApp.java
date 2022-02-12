@@ -3,7 +3,6 @@ package xland.ioutils.resourcedl.console;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xland.ioutils.resourcedl.console.download.DownloadWrapper;
-import xland.ioutils.resourcedl.download.HashedDownload;
 import xland.ioutils.resourcedl.download.UriHashRule;
 import xland.ioutils.resourcedl.util.IOUtils;
 import xland.ioutils.resourcedl.util.spi.ConsoleRDAppProvider;
@@ -13,8 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -172,10 +169,6 @@ public class ConsoleApp implements ConsoleRDAppProvider {
             }
         }
 
-        static String calcTimeFilename() {
-            return DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now())
-                    .replace(':', '.').concat(".file");
-        }
     }
 
     @Override
