@@ -130,7 +130,12 @@ public class ConsoleApp implements ConsoleRDAppProvider {
             if (map.containsKey("download")) {
                 properties.put("mode", "download");
             }
-            properties.putAll(map);
+
+            map.forEach((k, v) -> {
+                if (v == null) properties.put(k, "");
+                else properties.put(k, v);
+            });
+            //properties.putAll(map);
         }
 
         private void putToMap(String k, String v, int index) {

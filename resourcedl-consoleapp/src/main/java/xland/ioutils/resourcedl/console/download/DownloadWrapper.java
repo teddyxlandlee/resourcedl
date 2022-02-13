@@ -55,9 +55,11 @@ public abstract class DownloadWrapper implements IOUtils.IORunnable {
             URL url = hd.getUrl();
             LOGGER.info("Starting to download from {} to {}",
                     url, hd.output());
+            long time = System.nanoTime();
             hd.runIo();
-            LOGGER.info("Successfully downloaded file {} from {}",
-                    hd.output(), url);
+            LOGGER.info("Successfully downloaded file {} from {} " +
+                            "using {}ms.",
+                    hd.output(), url, (System.nanoTime() - time) / 1e6);
         }
     }
 

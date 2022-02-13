@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.ServiceLoader;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String... args) {
         if (args.length == 0) {
             Iterator<GuiRDAppProvider> itr = ServiceLoader.load(GuiRDAppProvider.class).iterator();
             if (!itr.hasNext()) {
