@@ -30,7 +30,7 @@ import java.util.*;
  *       abstract path to stdout</li>
  *       <li>-u / --rule &lt;hashrule&gt;: see {@link UriHashRule#fromDesc(String)},
  *     default is {@link UriHashRule#sha1(boolean, boolean) R2} (Minecraft style)</li>
- *       <li>-a / --hasher &lt;hasher&gt;: </li>
+ *       <li>-a / --hasher &lt;hasher&gt;: sha256, sha1, ...</li>
  *       <li>paths to the original files</li>
  *   </ul></li>
  *
