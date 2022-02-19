@@ -137,6 +137,9 @@ public class ConsoleApp implements ConsoleRDAppProvider {
             if (map.containsKey("download")) {
                 properties.put("mode", "download");
             }
+            if (map.containsKey("checksum")) {
+                properties.put("mode", "checksum");
+            }
 
             map.forEach((k, v) -> {
                 if (v == null) v = "";

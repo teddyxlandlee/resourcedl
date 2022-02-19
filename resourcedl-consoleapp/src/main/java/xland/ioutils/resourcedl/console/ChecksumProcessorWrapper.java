@@ -10,10 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Properties;
+import java.util.*;
 
 public final class ChecksumProcessorWrapper implements IOUtils.IORunnable {
     private final ArrayList<ChecksumProcessor> processors;
@@ -32,7 +29,8 @@ public final class ChecksumProcessorWrapper implements IOUtils.IORunnable {
         UriHashRule rule = UriHashRule.fromDesc(Objects.requireNonNull(properties.getProperty("rule")));
         String rs = properties.getProperty("root");
         Path[] paths = Arrays.stream(s).map(Paths::get).toArray(Path[]::new);
-        Hasher hasher = Hasher.getHasher(properties.getProperty("hasher", "sha256"));
+        Hasher hasher = Hasher.getHasher(properties.getProperty("hasher", "sha256")
+                .toLowerCase(Locale.ROOT));
 
         if (rs == null && properties.containsKey("print")) {
             return new Printer(rule, paths, hasher);
