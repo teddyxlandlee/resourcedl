@@ -30,6 +30,12 @@ public class ChecksumProcessor implements IOUtils.IORunnable {
         String res = hasher.hash(Files.newInputStream(originFile))
                 .toString();
         Path path = uriHashRule.getFilePath(root, res);
+        if (uriHashRule.hasSubDirectory()) {
+            Path path2 = path.resolveSibling(originFile.getFileName());
+            LOGGER.info("Copying {} | {} to {}", originFile, res, path2);
+            Files.copy(originFile, path2);
+            LOGGER.info("Successfully copied {}", originFile);
+        }
         LOGGER.info("Copying {} | {} to {}", originFile, res, path);
         Files.copy(originFile, path);
         LOGGER.info("Successfully copied {}", originFile);
