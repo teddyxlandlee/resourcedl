@@ -10,6 +10,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 
 public class Hasher {
     private final MessageDigest messageDigest;
@@ -18,7 +22,29 @@ public class Hasher {
         this.messageDigest = messageDigest;
     }
 
-    public static Hasher getHasher(String messageDigest) {
+    private static final Map<String, Supplier<Hasher>> hasherSupplierMap;
+    static {
+        Map<String, Supplier<Hasher>> m = new HashMap<>();
+        m.put("sha256", Hasher::sha256);
+        m.put("sha1", Hasher::sha1);
+        m.put("sha512", Hasher::sha512);
+        m.put("sha224", Hasher::sha224);
+        m.put("sha384", Hasher::sha384);
+        m.put("md5", Hasher::md5);
+        m.put("md2", Hasher::md2);
+
+        hasherSupplierMap = Collections.unmodifiableMap(m);
+    }
+
+    public static Hasher getHasher(String name)
+                throws IllegalArgumentException {
+        Supplier<Hasher> supplier = hasherSupplierMap.get(name);
+        if (supplier == null) {
+            throw new IllegalArgumentException(name);
+        } else return supplier.get();
+    }
+
+    private static Hasher getHasherInternal(String messageDigest) {
         try {
             return new Hasher(MessageDigest.getInstance(messageDigest));
         } catch (NoSuchAlgorithmException e) {
@@ -27,31 +53,31 @@ public class Hasher {
     }
 
     public static Hasher sha256() {
-        return getHasher("SHA-256");
+        return getHasherInternal("SHA-256");
     }
 
     public static Hasher sha1() {
-        return getHasher("SHA-1");
+        return getHasherInternal("SHA-1");
     }
 
     public static Hasher sha512() {
-        return getHasher("SHA-512");
+        return getHasherInternal("SHA-512");
     }
 
     public static Hasher sha224() {
-        return getHasher("SHA-224");
+        return getHasherInternal("SHA-224");
     }
 
     public static Hasher sha384() {
-        return getHasher("SHA-384");
+        return getHasherInternal("SHA-384");
     }
 
     public static Hasher md5() {
-        return getHasher("MD5");
+        return getHasherInternal("MD5");
     }
 
     public static Hasher md2() {
-        return getHasher("MD2");
+        return getHasherInternal("MD2");
     }
 
     public HashingResult hash(InputStream inputStream) throws IOException {

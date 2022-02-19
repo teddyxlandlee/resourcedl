@@ -24,6 +24,7 @@ dependencies {
 
     testImplementation("com.google.guava", "guava", "31.0.1-jre")
     testImplementation("commons-codec:commons-codec:1.15")
+    testImplementation("com.google.jimfs:jimfs:1.2")
 }
 
 java {

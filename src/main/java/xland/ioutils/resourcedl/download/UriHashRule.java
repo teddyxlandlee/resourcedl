@@ -2,6 +2,7 @@ package xland.ioutils.resourcedl.download;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -40,6 +41,26 @@ public class UriHashRule {
 
     public static UriHashRule sha256c24x(boolean repeat, boolean hasSubDirectory) {
         return new UriHashRule(sha256c24x, repeat, hasSubDirectory, null);
+    }
+
+    /**
+     * @throws IndexOutOfBoundsException if any of cut indexes is out
+     * of {@code hash.length()}.
+     */
+    public Path getFilePath(Path root, final String hash) {
+        Path p = root;
+        int lastIndex = 0;
+        for (int i : cutIndexes) {
+            p = p.resolve(hash.substring(lastIndex, i));
+            lastIndex = i;
+        }
+        if (repeat)
+            p = p.resolve(hash);
+        else
+            p = p.resolve(hash.substring(lastIndex));
+        if (hasSubDirectory)
+            p = p.resolve("file");
+        return p;
     }
 
     /**

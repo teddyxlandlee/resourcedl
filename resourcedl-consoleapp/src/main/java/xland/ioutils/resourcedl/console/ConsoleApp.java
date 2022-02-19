@@ -2,7 +2,6 @@ package xland.ioutils.resourcedl.console;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xland.ioutils.resourcedl.console.download.DownloadWrapper;
 import xland.ioutils.resourcedl.download.UriHashRule;
 import xland.ioutils.resourcedl.util.IOUtils;
 import xland.ioutils.resourcedl.util.spi.ConsoleRDAppProvider;
@@ -25,7 +24,16 @@ import java.util.*;
  *     <li>-o / --output [filename], default {@code &lt;current-time&gt;.file}</li>
  *     <li>-p / --print: if {@code --output} doesn't exist, just print the URL
  *     to stdout</li>
+ *   </ul></li><li>-H / --checksum: <ul>
+ *       <li>-r / --root &lt;path&gt;: the root directory to be copied in</li>
+ *       <li>-p / --print: if {@code --root} doesn't exist, just print the
+ *       abstract path to stdout</li>
+ *       <li>-u / --rule &lt;hashrule&gt;: see {@link UriHashRule#fromDesc(String)},
+ *     default is {@link UriHashRule#sha1(boolean, boolean) R2} (Minecraft style)</li>
+ *       <li>-a / --hasher &lt;hasher&gt;: </li>
+ *       <li>paths to the original files</li>
  *   </ul></li>
+ *
  *   <p>These above can be replaced with:</p>
  *   <li>&lt;path/to/properties&gt;: a properties file that contains all these above.
  *   For example: {@code <pre>
@@ -50,6 +58,7 @@ public class ConsoleApp implements ConsoleRDAppProvider {
 
         transient final Properties properties = new Properties(defaultProperties);
         final String[] args;
+        transient final ArrayList<String> rawArgs = new ArrayList<>();
 
         static final Map<Character, String> unix2gnu; static {
             Map<Character, String> m = new Hashtable<>();
@@ -60,14 +69,18 @@ public class ConsoleApp implements ConsoleRDAppProvider {
             m.put('u', "rule");
             m.put('o', "output");
             m.put('p', "print");
+            m.put('a', "hasher");
+
+            m.put('H', "checksum"); // use -u, -p/-r, -a
             unix2gnu = Collections.unmodifiableMap(m);
         }
         public static final String DEFAULT_ACTIVITY = "download";
 
-        static final Map<String, IOUtils.IOFunction<? super Properties, ? extends IOUtils.IORunnable>> ioRunnableMap;
+        static final Map<String, IOUtils.IOBiFunction<? super Properties, ? super String[], ? extends IOUtils.IORunnable>> ioRunnableMap;
         static {
-            Map<String, IOUtils.IOFunction<? super Properties, ? extends IOUtils.IORunnable>> m = new HashMap<>();
-            m.put("download", DownloadWrapper::get);
+            Map<String, IOUtils.IOBiFunction<? super Properties, ? super String[], ? extends IOUtils.IORunnable>> m = new HashMap<>();
+            m.put("download", PropertiesWrapper::download);
+            m.put("checksum", ChecksumProcessorWrapper::checksum);
 
             ioRunnableMap = Collections.unmodifiableMap(m);
         }
@@ -78,17 +91,17 @@ public class ConsoleApp implements ConsoleRDAppProvider {
         }
 
         void readArgs() {
-            if (getArgType(args[0]) < 0) {
+            if (args.length == 1 && getArgType(args[0]) < 0) {
                 // try parse it as path
                 try {
                     Path path = Paths.get(args[0]);
                     if (Files.exists(path) && !Files.isDirectory(path)) {
                         properties.load(Files.newBufferedReader(path));
                     }
+                    return;
                 } catch (IOException | InvalidPathException e) {
                     LOGGER.error("Failed to read property from {} because of {}", args[0], e);
                 }
-                return;
             }
 
             int argSize = args.length;
@@ -98,17 +111,11 @@ public class ConsoleApp implements ConsoleRDAppProvider {
                 int argType = getArgType(arg);
                 switch (argType) {
                     case UNKNOWN:
-                        if (lastArgument == null) {
-                            LOGGER.error("Illegal argument at index {}", i);
-                            System.exit(-1);
-                            return;
-                        } else {
-                            this.putToMap(lastArgument, arg, i);
-                            break;
-                        }
+                        this.putToMap(lastArgument, arg);
+                        break;
                     case GNU:
                         lastArgument = gnuCtx(arg);
-                        putToMap(lastArgument, null, i);
+                        putToMap(lastArgument, null);
                         break;
                     case UNIX:
                         int argLen = arg.length();
@@ -116,7 +123,7 @@ public class ConsoleApp implements ConsoleRDAppProvider {
                             char c = arg.charAt(j);
                             if (unix2gnu.containsKey(c)) {
                                 lastArgument = unix2gnu.get(c);
-                                putToMap(lastArgument, null, i);
+                                putToMap(lastArgument, null);
                             } else {
                                 LOGGER.error("Illegal argument at index {}: invalid option `-{}`", i, c);
                                 System.exit(-1);
@@ -132,26 +139,27 @@ public class ConsoleApp implements ConsoleRDAppProvider {
             }
 
             map.forEach((k, v) -> {
-                if (v == null) properties.put(k, "");
+                if (v == null) v = "";
+                if (k == null) {
+                    if (!v.isEmpty()) rawArgs.add(v);
+                }
                 else properties.put(k, v);
             });
             //properties.putAll(map);
         }
 
-        private void putToMap(String k, String v, int index) {
+        private void putToMap(String k, String v) {
             if (map.get(k) == null)
                 map.put(k, v);
             else {
-                LOGGER.error("Illegal argument at index {}: too many" +
-                        "arguments for `{}`", index, k);
-                System.exit(-1);
+                rawArgs.add(v);
             }
         }
 
         IOUtils.IORunnable parse() throws IOException {
             // default `download` when `mode` is not specified
             return ioRunnableMap.get(properties.getProperty("mode", DEFAULT_ACTIVITY))
-                    .applyIo(properties);
+                    .applyIo(properties, rawArgs.toArray(new String[0]));
         }
 
         static String gnuCtx(String arg) {

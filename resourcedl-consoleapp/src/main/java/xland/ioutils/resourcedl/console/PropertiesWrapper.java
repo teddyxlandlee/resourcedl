@@ -1,4 +1,4 @@
-package xland.ioutils.resourcedl.console.download;
+package xland.ioutils.resourcedl.console;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,16 +14,16 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Properties;
 
-public abstract class DownloadWrapper implements IOUtils.IORunnable {
+public abstract class PropertiesWrapper implements IOUtils.IORunnable {
     final Properties properties;
 
     static final Logger LOGGER = LoggerFactory.getLogger("ResourceDL Console DownloadWrapper");
 
-    DownloadWrapper(Properties properties) {
+    PropertiesWrapper(Properties properties) {
         this.properties = properties;
     }
 
-    private static final class UrlPrinterWrapper extends DownloadWrapper {
+    private static final class UrlPrinterWrapper extends PropertiesWrapper {
         UrlPrinterWrapper(Properties properties) {
             super(properties);
         }
@@ -39,7 +39,7 @@ public abstract class DownloadWrapper implements IOUtils.IORunnable {
         }
     }
 
-    private static final class HashedDownloadWrapper extends DownloadWrapper {
+    private static final class HashedDownloadWrapper extends PropertiesWrapper {
         HashedDownloadWrapper(Properties properties) {
             super(properties);
             if (!properties.containsKey("output")) {
@@ -63,7 +63,7 @@ public abstract class DownloadWrapper implements IOUtils.IORunnable {
         }
     }
 
-    public static IOUtils.IORunnable get(Properties properties) {
+    public static IOUtils.IORunnable download(Properties properties, String[] s) {
         if (properties.containsKey("print") && !properties.containsKey("output")) {
             return new UrlPrinterWrapper(properties);
         } else
