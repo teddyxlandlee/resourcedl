@@ -18,6 +18,10 @@ public final class HashedDownload implements IOUtils.IORunnable {
     private final UriHashRule uriHashRule;
 
     public HashedDownload(URI rootUri, Path output, String hash, UriHashRule uriHashRule) {
+        Objects.requireNonNull(rootUri, "rootUri");
+        Objects.requireNonNull(output, "output");
+        Objects.requireNonNull(hash, "hash");
+        Objects.requireNonNull(uriHashRule, "uriHashRule");
         this.rootUri = rootUri;
         this.output = output;
         this.hash = hash;
@@ -40,16 +44,6 @@ public final class HashedDownload implements IOUtils.IORunnable {
     @Override
     public void runIo() throws IOException {
         this.download();
-    }
-
-    public static HashedDownload fromProperties(Properties properties)
-            throws IllegalArgumentException, NullPointerException {
-        URI rootUri = URI.create(Objects.requireNonNull(properties.getProperty("root")));
-        Path output = Paths.get(Objects.requireNonNull(properties.getProperty("output")));
-        String hash = properties.getProperty("hash");
-        Objects.requireNonNull(hash);
-        UriHashRule uriHashRule = UriHashRule.fromDesc(properties.getProperty("rule"));
-        return new HashedDownload(rootUri, output, hash, uriHashRule);
     }
 
     public URI rootUri() {

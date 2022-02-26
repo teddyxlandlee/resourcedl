@@ -1,7 +1,7 @@
 package xland.test.ioutils.resourcedl.console;
 
 import org.junit.jupiter.api.Test;
-import xland.ioutils.resourcedl.console.ConsoleApp;
+import xland.ioutils.resourcedl.console.main.ConsoleApp;
 
 public class ConsoleUrlShowInternalTest {
     ConsoleApp consoleApp = new ConsoleApp();
