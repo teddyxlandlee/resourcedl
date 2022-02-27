@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Main-Class: xland.ioutils.resourcedl.Main
+Class-Path: resourcedl-consoleapp-0.1.0-SNAPSHOT.jar resourcedl-0.1.0-SN
+ APSHOT.jar slf4j-simple-2.0.0-alpha6.jar slf4j-api-2.0.0-alpha6.jar
+
