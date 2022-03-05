@@ -1,6 +1,5 @@
 package xland.ioutils.resourcedl.console.main;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -48,7 +47,10 @@ public final class Arg {
     public boolean isCommon() { return type == COMMON; }
 
     static Arg mapToGnu(Arg arg) {
-        return mapToGnu(arg, ArgParser.CommonMaps.MAJOR);
+        if (!arg.isUnix()) return arg;
+        String mapped = ArgParser.CommonMaps.MAJOR.get(arg.value);
+        if (mapped == null) return arg;
+        return gnu(mapped);
     }
 
     static Arg mapToGnu(Arg arg, Map<String, String> map) {

@@ -11,11 +11,13 @@ import java.util.stream.Collectors;
 final class ArgParser {
     interface CommonMaps {
         Map<String, String> MAJOR = PropertyBuilder.<String, String>of()
+                .add("h", "help")
                 .add("D", "download")
                 .add("H", "checksum")
                 .build();
         Map<String, Map<String, String>> MINOR = PropertyBuilder.<String, Map<String, String>>of()
                 .add("download", PropertyBuilder.<String, String>of()
+                        .add("h", "help")
                         .add("r", "root")
                         .add("s", "hash")
                         .add("u", "rule")
@@ -23,14 +25,16 @@ final class ArgParser {
                         .add("p", "print")
                         .build()
                 ).add("checksum", PropertyBuilder.<String, String>of()
+                        .add("h", "help")
                         .add("r", "root")
                         .add("p", "print")
                         .add("u", "rule")
                         .add("a", "hasher")
                         .build()
-                ).build();
+                ).add("help", Collections.emptyMap()).build();
         Map<String, IOUtils.IOFunction<List<Arg>, IOUtils.IORunnable>> RUNNABLE
                 = PropertyBuilder.<String, IOUtils.IOFunction<List<Arg>, IOUtils.IORunnable>>of()
+                .add("help", HelpMessages::root)
                 .add("download", RunnableGetters::download)
                 .add("checksum", RunnableGetters::checksum)
                 .build();
@@ -55,7 +59,7 @@ final class ArgParser {
             throw nse("required major process");
         } else {
             String arg = first.get().getValue();
-            Map<String, String> minor = CommonMaps.MINOR.get(arg);
+            final Map<String, String> minor = CommonMaps.MINOR.get(arg);
             if (minor == null) throw nse("Illegal major process: " + arg);
             List<Arg> argList = parsedList.stream()
                     .map(a -> Arg.mapToGnu(a, minor))

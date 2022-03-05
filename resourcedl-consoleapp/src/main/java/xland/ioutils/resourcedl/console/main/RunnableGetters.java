@@ -23,54 +23,59 @@ import static xland.ioutils.resourcedl.console.main.ArgParser.currentTime;
 import static xland.ioutils.resourcedl.console.main.ArgParser.nse;
 
 interface RunnableGetters {
-    static IOUtils.IORunnable download(List<Arg> args1) {
-        {
-            URI root = null;
-            String hash = null;
-            UriHashRule rule = UriHashRule.sha1(true, false);//R2
-            boolean print = false;
-            boolean defOutput = false;
-            Path output = Paths.get(currentTime());
 
-            ListIterator<Arg> iterator = args1.listIterator();
-            while (iterator.hasNext()) {
-                Arg arg = iterator.next();
-                if (arg.isGnu()) {
-                    switch (arg.getValue()) {
-                        case "root":
-                            arg = iterator.next();  // NEE
-                            if (!arg.isCommon()) throw nse("root");
-                            root = URI.create(arg.getValue());
-                            break;
-                        case "hash":
-                            arg = iterator.next();
-                            if (!arg.isCommon()) throw nse("hash");
-                            hash = arg.getValue();
-                            break;
-                        case "rule":
-                            arg = iterator.next();
-                            if (!arg.isCommon()) throw nse("rule");
-                            rule = UriHashRule.fromDesc(arg.getValue());
-                            break;
-                        case "output":
-                            arg = iterator.next();
-                            if (!arg.isCommon()) throw nse("output");
-                            defOutput = true;
-                            output = Paths.get(arg.getValue());
-                            break;
-                        case "print":
-                            print = true;
-                    }
+    static IOUtils.IORunnable download(List<Arg> args1) {
+        if (HelpMessages.containsHelpArg(args1))
+            return HelpMessages.log(HelpMessages::download);
+
+        URI root = null;
+        String hash = null;
+        UriHashRule rule = UriHashRule.sha1(true, false);//R2
+        boolean print = false;
+        boolean defOutput = false;
+        Path output = Paths.get(currentTime());
+
+        ListIterator<Arg> iterator = args1.listIterator();
+        while (iterator.hasNext()) {
+            Arg arg = iterator.next();
+            if (arg.isGnu()) {
+                switch (arg.getValue()) {
+                    case "root":
+                        arg = iterator.next();  // NEE
+                        if (!arg.isCommon()) throw nse("root");
+                        root = URI.create(arg.getValue());
+                        break;
+                    case "hash":
+                        arg = iterator.next();
+                        if (!arg.isCommon()) throw nse("hash");
+                        hash = arg.getValue();
+                        break;
+                    case "rule":
+                        arg = iterator.next();
+                        if (!arg.isCommon()) throw nse("rule");
+                        rule = UriHashRule.fromDesc(arg.getValue());
+                        break;
+                    case "output":
+                        arg = iterator.next();
+                        if (!arg.isCommon()) throw nse("output");
+                        defOutput = true;
+                        output = Paths.get(arg.getValue());
+                        break;
+                    case "print":
+                        print = true;
                 }
             }
-            print &= !defOutput;
-            HashedDownload hd = new HashedDownload(root, output, hash, rule);
-            if (!print) return hd;
-            return new URLPrinter(hd);
         }
+        print &= !defOutput;
+        HashedDownload hd = new HashedDownload(root, output, hash, rule);
+        if (!print) return hd;
+        return new URLPrinter(hd);
     }
 
-    static IOUtils.IORunnable checksum(List<Arg> args) throws IOException {
+    static IOUtils.IORunnable checksum(List<Arg> args) /*throws IOException*/ {
+        if (HelpMessages.containsHelpArg(args))
+            return HelpMessages.log(HelpMessages::checksum);
+
         Path root = null;
         boolean defRoot = false;
         boolean print = false;

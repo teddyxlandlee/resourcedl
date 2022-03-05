@@ -191,8 +191,9 @@ val shadowJar : ShadowJar by tasks.getting(ShadowJar::class) {
         exclude (project(":"))
         exclude (project(":resourcedl-consoleapp"))
     }
-    relocate("org.slf4j", "xland.ioutils.resourcedl.slf4j")
-    //exclude("**/module-info.class")
+    //relocate("org.slf4j", "xland.ioutils.resourcedl.slf4j")
+        // this is because shadowJar cannot shadow providers
+
     exclude("c581f1b2-3d4d-40c0-95fb-8558d25aec80")
 }
 
