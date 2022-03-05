@@ -20,4 +20,12 @@ tasks.getByName<Test>("test") {
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+    withSourcesJar()
+}
+
+publishing {
+    publications.getByName("mavenJava", MavenPublication::class) {
+        this.artifact(tasks.jar)
+        this.artifact(tasks.getByName("sourcesJar"))
+    }
 }

@@ -1,8 +1,8 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import java.nio.file.*
-import org.objectweb.asm.*
+import org.objectweb.asm.ClassWriter
+import java.nio.file.Files
+import java.nio.file.Paths
 import org.objectweb.asm.Opcodes as ops
-import java.util.UUID
 
 buildscript {
     dependencies {
@@ -155,17 +155,23 @@ dependencies {
     }
 }
 
-tasks.getByName("shadowJar", ShadowJar::class) {
-    configurations = listOf(project.configurations.shadow.get())
-    manifest { attributes["Main-Class"] = "xland.ioutils.resourcedl.Main" }
-    minimize {
-        exclude (project(":"))
-        exclude (project(":resourcedl-consoleapp"))
-    }
-    relocate("org.slf4j", "xland.ioutils.resourcedl.slf4j")
+fun createFile(dest : java.nio.file.Path) : File {
+    val bytes = theModuleInfo.toByteArray()
+    //buildDir.toPath()
+    dest.resolve(Paths.get("META-INF", "versions", "9", "module-info.class"))
+            .run {
+                Files.createDirectories(this.parent)
+                Files.newOutputStream(this).run {
+                    this.write(bytes)
+                    this.close()
+                }
+            }
+    return dest.toFile().resolve("META-INF").apply { this.deleteOnExit() }
+}
 
-    val dest = Files.createTempDirectory(UUID.randomUUID().toString())
-    doFirst {
+tasks.processResources {
+    doLast {
+        val dest = this@processResources.destinationDir.toPath()
         val bytes = theModuleInfo.toByteArray()
         dest.resolve(Paths.get("META-INF", "versions", "9", "module-info.class"))
                 .run {
@@ -175,9 +181,25 @@ tasks.getByName("shadowJar", ShadowJar::class) {
                         this.close()
                     }
                 }
-        //from(dest)
     }
-    doLast {
-        //Files.deleteIfExists(dest)
+}
+
+val shadowJar : ShadowJar by tasks.getting(ShadowJar::class) {
+    configurations = listOf(project.configurations.shadow.get())
+    manifest { attributes["Main-Class"] = "xland.ioutils.resourcedl.Main" }
+    minimize {
+        exclude (project(":"))
+        exclude (project(":resourcedl-consoleapp"))
+    }
+    relocate("org.slf4j", "xland.ioutils.resourcedl.slf4j")
+    //exclude("**/module-info.class")
+    exclude("c581f1b2-3d4d-40c0-95fb-8558d25aec80")
+}
+
+tasks.build.get().dependsOn(shadowJar)
+
+publishing {
+    publications.getByName("mavenJava", MavenPublication::class) {
+        this.artifact(shadowJar)
     }
 }
