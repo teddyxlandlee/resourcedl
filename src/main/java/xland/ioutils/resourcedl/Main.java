@@ -12,7 +12,7 @@ public class Main {
             Iterator<GuiRDAppProvider> itr = ServiceLoader.load(GuiRDAppProvider.class).iterator();
             if (!itr.hasNext()) {
                 System.err.println("Error: Gui App is not supported.\n" +
-                        "Try type `--help` for help");
+                        "Try type `--help` for help.");
                 System.exit(-1);
             } else {
                 GuiRDAppProvider provider = itr.next();

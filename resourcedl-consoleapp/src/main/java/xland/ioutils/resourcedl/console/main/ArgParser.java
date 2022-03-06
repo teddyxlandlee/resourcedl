@@ -30,6 +30,7 @@ final class ArgParser {
                         .add("p", "print")
                         .add("u", "rule")
                         .add("a", "hasher")
+                        .add("o", "output")
                         .build()
                 ).add("help", Collections.emptyMap()).build();
         Map<String, IOUtils.IOFunction<List<Arg>, IOUtils.IORunnable>> RUNNABLE
@@ -54,6 +55,11 @@ final class ArgParser {
 
     IOUtils.IORunnable parse() throws NoSuchElementException, IOException {
         if (parsedList.isEmpty()) throw nse("required arguments");
+        // TODO: properties download
+        //if (parsedList.size() == 1 && parsedList.get(0).isCommon()) {
+        //    return PropertiesFileDownloading.fromFile(Paths.get(parsedList.get(0).getValue()));
+        //}
+
         Optional<Arg> first = parsedList.stream().filter(Arg::isGnu).findFirst();
         if (!first.isPresent()) {
             throw nse("required major process");

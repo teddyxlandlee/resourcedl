@@ -29,8 +29,4 @@ public class IOUtils {
     public interface IOFunction<T, R> {
         R applyIo(T t) throws IOException;
     }
-
-    public interface IOBiFunction<T, U, R> {
-        R applyIo(T t, U u) throws IOException;
-    }
 }

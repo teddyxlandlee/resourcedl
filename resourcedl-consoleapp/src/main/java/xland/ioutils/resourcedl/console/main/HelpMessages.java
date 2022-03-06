@@ -22,7 +22,7 @@ interface HelpMessages {
                 "\t-p / --print: if --root doesn't exist, just print the abstract path to stdout\n" +
                 "\t-u / --rule <hashrule>: hash string splitting rule. Type `-h rule` to" +
                     " get further information.\n" +
-                "\t-a / --hasher <hasher>: sha256, sha1, ...\n (default sha256)" +
+                "\t-a / --hasher <hasher>: sha256, sha1, ... (default sha256)\n" +
                 "\tpaths to the original files";
     }
 
@@ -34,7 +34,10 @@ interface HelpMessages {
                 "For example, we are processing a file called `one.txt`, hashes 0123456789abcdef.\n" +
                 "- R2,4,6\t-> 01/23/45/0123456789abcdef\n" +
                 "- 2,4,6\t-> 01/23/45/6789abcdef\n" +
-                "- S2,4,6\t-> 01/23/45/6789abcdef/file along with 01/23/45/6789abcdef/one.txt";
+                "- S2,4,6\t-> 01/23/45/6789abcdef/file along with 01/23/45/6789abcdef/one.txt\n" +
+                "\n" +
+                "Default: R2\t//Repeats, CutIndexes=2, which is Minecraft-style" +
+                    " used in https://download.resources.minecraft.net/.";
     }
 
     static String all() {
