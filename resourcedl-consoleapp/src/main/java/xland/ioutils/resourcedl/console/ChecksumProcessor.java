@@ -35,7 +35,7 @@ public class ChecksumProcessor implements IOUtils.IORunnable {
         Files.createDirectories(path.getParent());
         Files.copy(originFile, path);
         LOGGER.info("Successfully copied {}", originFile);
-        if (uriHashRule.hasSubDirectory() && !path.endsWith("file")) {
+        if (uriHashRule.hasSubDirectory() && path.endsWith("file")) {
             Path path2 = path.resolveSibling(originFile.getFileName());
             LOGGER.info("Copying {} | {} to {}", originFile, res, path2);
             //Files.createDirectories(path2.getParent());
