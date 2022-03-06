@@ -82,6 +82,7 @@ interface RunnableGetters {
         UriHashRule rule = UriHashRule.sha1(true, false);//R2
         Hasher hasher = Hasher.sha256();
         //Path output = null;
+        boolean interactive = false;
         final List<Path> originalFiles = new ArrayList<>();
 
         ListIterator<Arg> iterator = args.listIterator();
@@ -114,7 +115,8 @@ interface RunnableGetters {
                     //    if (!arg.isCommon()) throw nse("output");
                     //    output = Paths.get(arg.getValue());
                     case "interactive":
-
+                        interactive = true;
+                        break;
                 }
             }
         }
@@ -126,8 +128,10 @@ interface RunnableGetters {
         final Path finalRoot = Objects.requireNonNull(root, "root");
         final Hasher finalHasher = Objects.requireNonNull(hasher, "hasher");
         final UriHashRule finalRule = Objects.requireNonNull(rule, "rule");
+        final boolean finalInteractive = interactive;
         List<ChecksumProcessor> processors = originalFiles.stream() // TODO parallel?
-                .map(p -> new ChecksumProcessor(finalRoot, finalHasher, finalRule, p))
+                .map(p -> new ChecksumProcessor(finalRoot, finalHasher, finalRule, p,
+                        finalInteractive))
                 .collect(Collectors.toList());
         return new MultiChecksumProcessor(processors);
     }
