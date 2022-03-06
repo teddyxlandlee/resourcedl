@@ -81,7 +81,7 @@ interface RunnableGetters {
         boolean print = false;
         UriHashRule rule = UriHashRule.sha1(true, false);//R2
         Hasher hasher = Hasher.sha256();
-        Path output = null;
+        //Path output = null;
         final List<Path> originalFiles = new ArrayList<>();
 
         ListIterator<Arg> iterator = args.listIterator();
@@ -109,10 +109,12 @@ interface RunnableGetters {
                         if (!arg.isCommon()) throw nse("hasher");
                         hasher = Hasher.getHasher(arg.getValue());
                         break;
-                    case "output":
-                        arg = iterator.next();   // NEE
-                        if (!arg.isCommon()) throw nse("output");
-                        output = Paths.get(arg.getValue());
+                    //case "output":
+                    //    arg = iterator.next();   // NEE
+                    //    if (!arg.isCommon()) throw nse("output");
+                    //    output = Paths.get(arg.getValue());
+                    case "interactive":
+
                 }
             }
         }

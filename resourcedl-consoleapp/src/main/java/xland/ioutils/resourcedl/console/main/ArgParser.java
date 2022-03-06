@@ -31,6 +31,7 @@ final class ArgParser {
                         .add("u", "rule")
                         .add("a", "hasher")
                         .add("o", "output")
+                        .add("i", "interactive")
                         .build()
                 ).add("help", Collections.emptyMap()).build();
         Map<String, IOUtils.IOFunction<List<Arg>, IOUtils.IORunnable>> RUNNABLE

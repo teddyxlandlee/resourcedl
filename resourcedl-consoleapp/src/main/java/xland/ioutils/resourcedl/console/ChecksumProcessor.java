@@ -7,6 +7,7 @@ import xland.ioutils.resourcedl.hashing.Hasher;
 import xland.ioutils.resourcedl.util.IOUtils;
 
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -15,14 +16,18 @@ public class ChecksumProcessor implements IOUtils.IORunnable {
     private final Hasher hasher;
     private final UriHashRule uriHashRule;
     private final Path originFile;
+    private final boolean interactive;
 
     private static final Logger LOGGER = LoggerFactory.getLogger("ChecksumProcessor");
 
-    public ChecksumProcessor(Path root, Hasher hasher, UriHashRule uriHashRule, Path originFile) {
+    public ChecksumProcessor(Path root, Hasher hasher, UriHashRule uriHashRule, Path originFile,
+                             boolean interactive) {
         this.root = root;
         this.hasher = hasher;
         this.uriHashRule = uriHashRule;
         this.originFile = originFile;
+
+        this.interactive = interactive;
     }
 
     @Override
@@ -31,17 +36,28 @@ public class ChecksumProcessor implements IOUtils.IORunnable {
                 .toString();
         Path path = uriHashRule.getFilePath(root, res);
 
-        LOGGER.info("Copying {} | {} to {}", originFile, res, path);
         Files.createDirectories(path.getParent());
-        Files.copy(originFile, path);
-        LOGGER.info("Successfully copied {}", originFile);
+        copy(path, res);
         if (uriHashRule.hasSubDirectory() && path.endsWith("file")) {
             Path path2 = path.resolveSibling(originFile.getFileName());
-            LOGGER.info("Copying {} | {} to {}", originFile, res, path2);
-            //Files.createDirectories(path2.getParent());
-            Files.copy(originFile, path2);
-            LOGGER.info("Successfully copied {}", originFile);
+            copy(path2, res);
         }
+    }
+
+    private void copy(Path target, String res) throws IOException {
+        LOGGER.info("Copying {} | {} to {}", originFile, res, target);
+        if (Files.exists(target)) {
+            boolean skip = this.interactive &&
+                    InteractiveManaging.readYesOrNo("File `" + target + "` already exists.\n" +
+                            " Skip? [y/N] ", false);
+            if (skip) {
+                LOGGER.info("Skipped existing file: " + target);
+                return;
+            } else throw new FileAlreadyExistsException(target.toString());
+        }
+
+        Files.copy(originFile, target);
+        LOGGER.info("Successfully copied {}", originFile);
     }
 
     public Path root() { return root; }
