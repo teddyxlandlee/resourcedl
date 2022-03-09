@@ -1,0 +1,5 @@
+  ---------- **********  PLACEHOLDER FILE  ********** ----------
+This is a placeholder file in case processResources task does not
+run. We should generate META-INF/versions/9/module-info.class into
+$buildDir/resources/main. The placeholder file will be excluded
+during shadowJar.

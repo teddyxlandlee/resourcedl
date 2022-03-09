@@ -10,8 +10,10 @@ allprojects {
     apply (plugin="maven-publish")
     apply (plugin="signing")
 
-    version = "0.1.0-SNAPSHOT"
+    version = project.property("version").toString()
     group = "xland.ioutils.resourcedl"
+
+    logger.info("Building $name version: $version")
 
     repositories {
         if (!env.containsKey("MAVEN_CENTRAL_FIRST")) {
@@ -63,12 +65,12 @@ allprojects {
 }
 
 dependencies {
+    implementation("org.slf4j:slf4j-api:2.0.0-alpha6")
+
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 
-    testImplementation("com.google.guava", "guava", "31.0.1-jre")
-    testImplementation("commons-codec:commons-codec:1.15")
-    testImplementation("com.google.jimfs:jimfs:1.2")
+    //testImplementation("org.apache.commons:commons-lang3:3.20")
 }
 
 java {
@@ -81,10 +83,11 @@ tasks.getByName<Test>("test") {
     useJUnitPlatform()
 }
 
-tasks.jar {
+tasks.processResources {
     this.from("LICENSE.txt") {
         rename { "META-INF/LICENSE_resourcedl" }
     }
+    this.exclude("0ab8fee2-09d1-4d41-baa3-67852cd28a4e")
 }
 
 publishing {

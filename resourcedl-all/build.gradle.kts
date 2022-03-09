@@ -139,7 +139,7 @@ val theModuleInfo = ModuleInfo(
             "xland.ioutils.resourcedl.console.main.ConsoleApp")
 }
 
-version = "0.1.0-SNAPSHOT"
+version = rootProject.property("version").toString()
 
 val env: Map<String, String?> = System.getenv()
 val properties: java.util.Properties = System.getProperties()
@@ -147,11 +147,17 @@ val properties: java.util.Properties = System.getProperties()
 val excludeConsoleApp : Boolean get()
         = env.containsKey("EXCLUDE_RD_CONSOLE_APP") ||
             "true" == properties.getProperty("resourcedl.build.excludeConsoleApp")
+val excludeJsonMultiFile : Boolean get()
+        = env.containsKey("EXCLUDE_RD_JSON_MULTIFILE") ||
+            "true" == properties.getProperty("resourcedl.build.excludeJsonMultiFile")
 
 dependencies {
     shadow(project(":"))
     if (!excludeConsoleApp) {
         shadow(project(":resourcedl-consoleapp"))
+    }
+    if (!excludeJsonMultiFile) {
+        shadow(project(":resourcedl-json-multifile"))
     }
 }
 
@@ -190,6 +196,7 @@ val shadowJar : ShadowJar by tasks.getting(ShadowJar::class) {
     minimize {
         exclude (project(":"))
         exclude (project(":resourcedl-consoleapp"))
+        exclude (project(":resourcedl-json-multifile"))
     }
     //relocate("org.slf4j", "xland.ioutils.resourcedl.slf4j")
         // this is because shadowJar cannot shadow providers

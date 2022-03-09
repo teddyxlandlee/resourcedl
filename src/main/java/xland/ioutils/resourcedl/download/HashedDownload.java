@@ -1,5 +1,7 @@
 package xland.ioutils.resourcedl.download;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xland.ioutils.resourcedl.util.IOUtils;
 
 import java.io.IOException;
@@ -7,15 +9,15 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
-import java.util.Properties;
 
 public final class HashedDownload implements IOUtils.IORunnable {
     private final URI rootUri;
     private final Path output;
     private final String hash;
     private final UriHashRule uriHashRule;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger("HashedDownload");
 
     public HashedDownload(URI rootUri, Path output, String hash, UriHashRule uriHashRule) {
         Objects.requireNonNull(rootUri, "rootUri");
@@ -38,7 +40,10 @@ public final class HashedDownload implements IOUtils.IORunnable {
     }
 
     public void download() throws IOException {
-        IOUtils.download(getUrl(), output);
+        URL url = getUrl();
+        LOGGER.info("Downloading from {} to {}", url, output);
+        IOUtils.download(url, output);
+        LOGGER.info("Successfully downloaded {}", url);
     }
 
     @Override

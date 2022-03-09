@@ -20,8 +20,7 @@ public class UriHashRule {
         this.hasSubDirectory = hasSubDirectory;
     }
 
-    private UriHashRule(int[] cutIndexes, boolean repeat, boolean hasSubDirectory,
-                        @SuppressWarnings("unused") Void _marker) {
+    private UriHashRule(boolean repeat, boolean hasSubDirectory, int[] cutIndexes) {
         this.cutIndexes = cutIndexes;
         this.repeat = repeat;
         this.hasSubDirectory = hasSubDirectory;
@@ -32,15 +31,15 @@ public class UriHashRule {
     private static final int[] sha1 = {2};
 
     public static UriHashRule sha256c246(boolean repeat, boolean hasSubDirectory) {
-        return new UriHashRule(sha256c246, repeat, hasSubDirectory, null);
+        return new UriHashRule(repeat, hasSubDirectory, sha256c246);
     }
 
     public static UriHashRule sha1(boolean repeat, boolean hasSubDirectory) {
-        return new UriHashRule(sha1, repeat, hasSubDirectory, null);
+        return new UriHashRule(repeat, hasSubDirectory, sha1);
     }
 
     public static UriHashRule sha256c24x(boolean repeat, boolean hasSubDirectory) {
-        return new UriHashRule(sha256c24x, repeat, hasSubDirectory, null);
+        return new UriHashRule(repeat, hasSubDirectory, sha256c24x);
     }
 
     /**
