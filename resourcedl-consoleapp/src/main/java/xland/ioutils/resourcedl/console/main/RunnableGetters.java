@@ -136,6 +136,10 @@ interface RunnableGetters {
         return new MultiChecksumProcessor(processors);
     }
 
+    static IOUtils.IORunnable multiFile(List<Arg> args) throws IOException {
+        throw new UnsupportedOperationException();//TODO
+    }
+
     final class URLPrinter implements IOUtils.IORunnable {
         private static final Logger LOGGER = LoggerFactory.getLogger("URLPrinter");
         private final HashedDownload hd;

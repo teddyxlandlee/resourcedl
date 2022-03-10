@@ -49,6 +49,7 @@ public class ConsoleApp implements ConsoleRDAppProvider {
                     new ArgParser(args).parse();
             LOGGER.info("Preparing to launch {}", runnable);
             runnable.runIo();
+            LOGGER.info("Done");
         } catch (Throwable t) {
             LOGGER.error("An unexpected error has occurred", t);
         }

@@ -14,6 +14,7 @@ final class ArgParser {
                 .add("h", "help")
                 .add("D", "download")
                 .add("H", "checksum")
+                .add("M", "multifile")
                 .build();
         Map<String, Map<String, String>> MINOR = PropertyBuilder.<String, Map<String, String>>of()
                 .add("download", PropertyBuilder.<String, String>of()
@@ -33,12 +34,16 @@ final class ArgParser {
                         .add("o", "output")
                         .add("i", "interactive")
                         .build()
+                ).add("multifile", PropertyBuilder.<String, String>of()
+                        .add("o", "output")
+                        .build()
                 ).add("help", Collections.emptyMap()).build();
         Map<String, IOUtils.IOFunction<List<Arg>, IOUtils.IORunnable>> RUNNABLE
                 = PropertyBuilder.<String, IOUtils.IOFunction<List<Arg>, IOUtils.IORunnable>>of()
                 .add("help", HelpMessages::root)
                 .add("download", RunnableGetters::download)
                 .add("checksum", RunnableGetters::checksum)
+                .add("multifile", RunnableGetters::multiFile)
                 .build();
     }
 
