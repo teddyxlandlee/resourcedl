@@ -7,16 +7,14 @@ import xland.ioutils.resourcedl.download.HashedDownload;
 import xland.ioutils.resourcedl.download.UriHashRule;
 import xland.ioutils.resourcedl.hashing.Hasher;
 import xland.ioutils.resourcedl.util.IOUtils;
+import xland.ioutils.resourcedl.util.spi.MultiFileDownloadProvider;
 
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static xland.ioutils.resourcedl.console.main.ArgParser.currentTime;
@@ -133,11 +131,46 @@ interface RunnableGetters {
                 .map(p -> new ChecksumProcessor(finalRoot, finalHasher, finalRule, p,
                         finalInteractive))
                 .collect(Collectors.toList());
-        return new MultiChecksumProcessor(processors);
+        return new MultiTaskProcessors(processors);
     }
 
     static IOUtils.IORunnable multiFile(List<Arg> args) throws IOException {
-        throw new UnsupportedOperationException();//TODO
+        if (HelpMessages.containsHelpArg(args)) {
+            return HelpMessages.log(HelpMessages::multiFile);
+        }
+
+        Iterator<MultiFileDownloadProvider> providers = ServiceLoader.load(MultiFileDownloadProvider.class).iterator();
+        if (!providers.hasNext())
+            ConsoleApp.LOGGER.error("`--multifile` is unsupported: no service provided");
+        MultiFileDownloadProvider provider = providers.next();
+        if (providers.hasNext())
+            ConsoleApp.LOGGER.warn("More than one multifile download provider are provided");
+
+        Path output = null;
+        List<Path> json = new ArrayList<>();
+
+        ListIterator<Arg> iterator = args.listIterator();
+        while (iterator.hasNext()) {
+            Arg arg = iterator.next();
+            if (arg.isGnu()) {
+                if ("output".equals(arg.getValue())) {
+                    arg = iterator.next();  // NEE
+                    if (!arg.isCommon()) throw nse("output");
+                    output = Paths.get(arg.getValue());
+                }
+            } else if (arg.isCommon()) {
+                json.add(Paths.get(arg.getValue()));
+            }
+        }
+
+        if (json.isEmpty()) {
+            ConsoleApp.LOGGER.warn("No files provided");
+            return () -> {};
+        } else {
+            List<IOUtils.IORunnable> l = new ArrayList<>();
+            for (Path p : json) l.addAll(provider.getDownloadEngine(p, output));
+            return new MultiTaskProcessors(l);
+        }
     }
 
     final class URLPrinter implements IOUtils.IORunnable {
@@ -154,18 +187,22 @@ interface RunnableGetters {
         }
     }
 
-    final class MultiChecksumProcessor implements IOUtils.IORunnable {
-        //TODO: MultiThread support
-        private final List<ChecksumProcessor> processors;
+    final class MultiTaskProcessors implements IOUtils.IORunnable {
+        private final List<? extends IOUtils.IORunnable> processors;
 
-        public MultiChecksumProcessor(List<ChecksumProcessor> processors) {
+        public MultiTaskProcessors(List<? extends IOUtils.IORunnable> processors) {
             this.processors = processors;
         }
 
         @Override
         public void runIo() throws IOException {
-            for (ChecksumProcessor cp : processors)
-                cp.runIo();
+            for (IOUtils.IORunnable r : processors)
+                r.runIo();
+        }
+
+        @Override
+        public String toString() {
+            return String.format("MultiTaskProcessors[%s]", processors);
         }
     }
 

@@ -137,6 +137,10 @@ val theModuleInfo = ModuleInfo(
     exports("xland.ioutils.resourcedl.console")
     provides("xland.ioutils.resourcedl.util.spi.ConsoleRDAppProvider",
             "xland.ioutils.resourcedl.console.main.ConsoleApp")
+
+    exports("xland.ioutils.resourcedl.multifile.json")
+    provides("xland.ioutils.resourcedl.util.spi.MultiFileDownloadProvider",
+            "xland.ioutils.resourcedl.multifile.json.JsonMultiFileDownloadProvider")
 }
 
 version = rootProject.property("version").toString()

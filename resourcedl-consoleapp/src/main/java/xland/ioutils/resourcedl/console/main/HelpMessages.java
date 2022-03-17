@@ -37,11 +37,19 @@ interface HelpMessages {
                 "- S2,4,6\t-> 01/23/45/6789abcdef/file along with 01/23/45/6789abcdef/one.txt\n" +
                 "\n" +
                 "Default: R2\t//Repeats, CutIndexes=2, which is Minecraft-style" +
-                    " used in https://download.resources.minecraft.net/.";
+                    " used in https://resources.download.minecraft.net/.";
+    }
+
+    static String multiFile() {
+        return "-M / --multifile:\n" +
+                "\t-o / --output: destination directory\n" +
+                "\tpaths to the original json file";
+        //TODO enable parameter URI/URL
     }
 
     static String all() {
-        return "Arguments:\n\n" + download() + "\n\n" + checksum();
+        return "Arguments:\n\n" + download() + "\n\n" + checksum()
+                + "\n\n" + multiFile();
     }
 
     static boolean containsHelpArg(List<Arg> args) {

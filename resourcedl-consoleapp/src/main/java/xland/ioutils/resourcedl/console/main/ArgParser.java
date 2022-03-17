@@ -36,6 +36,7 @@ final class ArgParser {
                         .build()
                 ).add("multifile", PropertyBuilder.<String, String>of()
                         .add("o", "output")
+                        .add("h", "help")
                         .build()
                 ).add("help", Collections.emptyMap()).build();
         Map<String, IOUtils.IOFunction<List<Arg>, IOUtils.IORunnable>> RUNNABLE
