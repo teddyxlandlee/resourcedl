@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 public class ChecksumProcessor implements IOUtils.IORunnable {
     /*@Nullable*/ private final Path root;
@@ -18,22 +19,25 @@ public class ChecksumProcessor implements IOUtils.IORunnable {
     private final Path originFile;
     private final boolean interactive;
 
+    private final Map<Path, String> hashCache;
+
     private static final Logger LOGGER = LoggerFactory.getLogger("ChecksumProcessor");
 
     public ChecksumProcessor(Path root, Hasher hasher, UriHashRule uriHashRule, Path originFile,
-                             boolean interactive) {
+                             boolean interactive, Map<Path, String> hashCache) {
         this.root = root;
         this.hasher = hasher;
         this.uriHashRule = uriHashRule;
         this.originFile = originFile;
 
         this.interactive = interactive;
+        this.hashCache = hashCache;
     }
 
     @Override
     public void runIo() throws IOException {
-        String res = hasher.hash(Files.newInputStream(originFile))
-                .toString();
+        String res = hashCache.getOrDefault(originFile, hasher.hash(Files.newInputStream(originFile))
+                .toString());
         Path path = uriHashRule.getFilePath(root, res);
 
         Files.createDirectories(path.getParent());

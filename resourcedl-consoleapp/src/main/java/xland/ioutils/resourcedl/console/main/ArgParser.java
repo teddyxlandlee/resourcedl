@@ -33,6 +33,11 @@ final class ArgParser {
                         .add("a", "hasher")
                         .add("o", "output")
                         .add("i", "interactive")
+
+                        .add("o", "output")
+                        .add("O", "stdout")
+                        .add("R", "relative")
+                        .add("e", "target")
                         .build()
                 ).add("multifile", PropertyBuilder.<String, String>of()
                         .add("o", "output")

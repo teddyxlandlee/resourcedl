@@ -23,6 +23,10 @@ interface HelpMessages {
                 "\t-u / --rule <hashrule>: hash string splitting rule. Type `-h rule` to" +
                     " get further information.\n" +
                 "\t-a / --hasher <hasher>: sha256, sha1, ... (default sha256)\n" +
+                "\t-o / --output <file>: if possible, print multi-file configuration to the file\n" +
+                "\t-O / --stdout: if possible, print multi-file configuration to stdout\n" +
+                "\t-R / --relative <root>: when generating multi-file configuration, use relative path\n" +
+                "\t-e / --target <uri>: when generating multi-file configuration, use target URI\n" +
                 "\tpaths to the original files";
     }
 

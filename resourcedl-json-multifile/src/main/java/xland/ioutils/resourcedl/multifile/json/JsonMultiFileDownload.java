@@ -88,7 +88,8 @@ public class JsonMultiFileDownload {
         if (preConf != null) return output.resolve(preConf);
         preConf = url.getPath();
         if (preConf.isEmpty()) preConf = url.toString();
-        preConf = preConf.substring(preConf.lastIndexOf('/'));
+        preConf = preConf.substring(preConf.lastIndexOf('/') +1)
+                .substring(preConf.lastIndexOf('\\')+1);
         return output.resolve(preConf);
     }
 

@@ -57,10 +57,12 @@ allprojects {
             }
         }
     }
-    signing {
-        useGpgCmd()
+    if (!env.containsKey("DONT_SIGN")) {
+        signing {
+            useGpgCmd()
 
-        this.sign(publishing.publications)
+            this.sign(publishing.publications)
+        }
     }
 }
 

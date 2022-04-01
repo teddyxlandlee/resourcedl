@@ -3,15 +3,18 @@ package xland.ioutils.resourcedl.download;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xland.ioutils.resourcedl.util.IOUtils;
+import xland.ioutils.resourcedl.util.UrlProvider;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.AbstractMap;
+import java.util.Map;
 import java.util.Objects;
 
-public final class HashedDownload implements IOUtils.IORunnable {
+public final class HashedDownload implements IOUtils.IORunnable, UrlProvider {
     private final URI rootUri;
     private final Path output;
     private final String hash;
@@ -39,6 +42,20 @@ public final class HashedDownload implements IOUtils.IORunnable {
         return uriHashRule.getFileUri(rootUri, hash).toURL();
     }
 
+    @Override
+    public HashedDownload asHashedDownload() {
+        return this;
+    }
+
+    @Override
+    public Path getOutput() {
+        return output;
+    }
+
+    public Map.Entry<URI, UriHashRule> getWebsiteInfo() {
+        return new AbstractMap.SimpleImmutableEntry<>(getRootUri(), getUriHashRule());
+    }
+
     public void download() throws IOException {
         URL url = getUrl();
         LOGGER.info("Downloading from {} to {}", url, output);
@@ -51,19 +68,15 @@ public final class HashedDownload implements IOUtils.IORunnable {
         this.download();
     }
 
-    public URI rootUri() {
+    public URI getRootUri() {
         return rootUri;
     }
 
-    public Path output() {
-        return output;
-    }
-
-    public String hash() {
+    public String getHash() {
         return hash;
     }
 
-    public UriHashRule uriHashRule() {
+    public UriHashRule getUriHashRule() {
         return uriHashRule;
     }
 

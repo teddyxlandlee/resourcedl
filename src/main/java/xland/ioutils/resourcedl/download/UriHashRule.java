@@ -170,10 +170,12 @@ public class UriHashRule {
 
     @Override
     public String toString() {
-        return "UriHashRule{" +
-                "cutIndexes=" + Arrays.toString(cutIndexes) +
-                ", repeat=" + repeat +
-                ", hasSubDirectory=" + hasSubDirectory +
-                '}';
+        StringBuilder sb = new StringBuilder();
+        if (repeat()) sb.append('R');
+        if (hasSubDirectory()) sb.append('S');
+        sb.append(String.join(",", Arrays.stream(cutIndexes())
+                .mapToObj(Integer::toString)
+                .toArray(CharSequence[]::new)));
+        return sb.toString();
     }
 }

@@ -10,7 +10,9 @@ repositories {
 
 dependencies {
     implementation(project(":"))
-    implementation("org.sharegov:mjson:1.4.1")
+    implementation("org.sharegov:mjson:1.4.1") {
+        exclude("junit")
+    }
 
     implementation("org.slf4j:slf4j-api:2.0.0-alpha6")
 
