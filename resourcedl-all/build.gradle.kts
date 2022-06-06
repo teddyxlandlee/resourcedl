@@ -196,7 +196,10 @@ tasks.processResources {
 
 val shadowJar : ShadowJar by tasks.getting(ShadowJar::class) {
     configurations = listOf(project.configurations.shadow.get())
-    manifest { attributes["Main-Class"] = "xland.ioutils.resourcedl.Main" }
+    manifest { 
+        attributes["Main-Class"] = "xland.ioutils.resourcedl.Main"
+        attributes["Multi-Release"] = "true"
+    }
     minimize {
         exclude (project(":"))
         exclude (project(":resourcedl-consoleapp"))
