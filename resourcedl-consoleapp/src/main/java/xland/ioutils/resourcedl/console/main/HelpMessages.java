@@ -27,6 +27,7 @@ interface HelpMessages {
                 "\t-O / --stdout: if possible, print multi-file configuration to stdout\n" +
                 "\t-R / --relative <root>: when generating multi-file configuration, use relative path\n" +
                 "\t-e / --target <uri>: when generating multi-file configuration, use target URI\n" +
+                "\t-L / --print-url: if `target` provided, print URL info\n" +
                 "\tpaths to the original files";
     }
 

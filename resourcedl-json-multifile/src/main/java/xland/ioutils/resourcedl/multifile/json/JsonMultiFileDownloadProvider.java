@@ -85,5 +85,6 @@ public class JsonMultiFileDownloadProvider implements MultiFileDownloadProvider 
         });
 
         os.write(array.toString().getBytes(StandardCharsets.UTF_8));
+        os.write('\n');
     }
 }

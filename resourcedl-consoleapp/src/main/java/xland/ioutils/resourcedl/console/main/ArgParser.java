@@ -38,6 +38,8 @@ final class ArgParser {
                         .add("O", "stdout")
                         .add("R", "relative")
                         .add("e", "target")
+
+                        .add("L", "print-url")
                         .build()
                 ).add("multifile", PropertyBuilder.<String, String>of()
                         .add("o", "output")
@@ -67,10 +69,6 @@ final class ArgParser {
 
     IOUtils.IORunnable parse() throws NoSuchElementException, IOException {
         if (parsedList.isEmpty()) throw nse("required arguments");
-        // TODO: properties download
-        //if (parsedList.size() == 1 && parsedList.get(0).isCommon()) {
-        //    return PropertiesFileDownloading.fromFile(Paths.get(parsedList.get(0).getValue()));
-        //}
 
         Optional<Arg> first = parsedList.stream().filter(Arg::isGnu).findFirst();
         if (!first.isPresent()) {

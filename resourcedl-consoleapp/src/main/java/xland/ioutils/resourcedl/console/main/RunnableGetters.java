@@ -87,8 +87,10 @@ interface RunnableGetters {
 
         OutputStream out1, out2;
         out1 = null; out2 = null;
-        Path rt = null;
+        Path rt = null, p;
         URI target = URI.create(".");
+
+        boolean printUrl = false;
 
         ListIterator<Arg> iterator = args.listIterator();
         while (iterator.hasNext()) {
@@ -122,7 +124,7 @@ interface RunnableGetters {
                     case "output":
                         arg = iterator.next();  // NEE
                         if (!arg.isCommon()) throw nse("output");
-                        Path p = Paths.get(arg.getValue());
+                        p = Paths.get(arg.getValue());
                         out1 = Files.newOutputStream(p);
                         break;
                     case "stdout":
@@ -138,45 +140,52 @@ interface RunnableGetters {
                         if (!arg.isCommon()) throw nse("target");
                         target = URI.create(arg.getValue());
                         break;
+                    case "print-url":
+                        printUrl = true;
+                        break;
                 }
             }
         }
         print &= !defRoot;
 
         final Map<Path, String> hashCache = new HashMap<>();
+
+        final Path finalRoot = Objects.requireNonNull(root, "root");
+        final Hasher finalHasher = Objects.requireNonNull(hasher, "hasher");
+        final UriHashRule finalRule = Objects.requireNonNull(rule, "rule");
+
         final OutputStream out = IOUtils.combine(out1, out2);
-        if (out != null) {
-            Hasher finalHasher1 = hasher;
+        if (out != null || printUrl) {
             URI finalTarget = target;
-            UriHashRule finalRule1 = rule;
             List<UrlProvider> hds = originalFiles.stream()
                     .map(path -> {
                         try {
-                            final String hash = finalHasher1.hash(Files.newInputStream(path)).toString();
+                            final String hash = finalHasher.hash(Files.newInputStream(path)).toString();
                             hashCache.put(path, hash);
                             return new HashedDownload(
                                     finalTarget, path,
                                     hash,
-                                    finalRule1
+                                    finalRule
                             );
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
                     }).collect(Collectors.toList());
-            MultiFileDownloadProvider provider = MultiTaskProcessors.getMultifileProvider();
-            provider.writeToJson(hds, rt, out);
+            if (out != null) {
+                MultiFileDownloadProvider provider = MultiTaskProcessors.getMultifileProvider();
+                provider.writeToJson(hds, rt, out);
+            }
+            if (printUrl) {
+                new URLPrinter(hds).runIo();
+            }
         }
 
         if (print)
             return new ChecksumPrinter(rule, originalFiles, hasher, hashCache);
 
-
-        final Path finalRoot = Objects.requireNonNull(root, "root");
-        final Hasher finalHasher = Objects.requireNonNull(hasher, "hasher");
-        final UriHashRule finalRule = Objects.requireNonNull(rule, "rule");
         final boolean finalInteractive = interactive;
         List<ChecksumProcessor> processors = originalFiles.stream() // TODO parallel?
-                .map(p -> new ChecksumProcessor(finalRoot, finalHasher, finalRule, p,
+                .map(p2 -> new ChecksumProcessor(finalRoot, finalHasher, finalRule, p2,
                         finalInteractive, hashCache))
                 .collect(Collectors.toList());
         return new MultiTaskProcessors(processors);
@@ -218,15 +227,31 @@ interface RunnableGetters {
 
     final class URLPrinter implements IOUtils.IORunnable {
         private static final Logger LOGGER = LoggerFactory.getLogger("URLPrinter");
-        private final HashedDownload hd;
+        private final List<UrlProvider> hd;
 
-        public URLPrinter(HashedDownload hd) {
+        URLPrinter(UrlProvider... hd) {
+            this.hd = Arrays.asList(hd);
+        }
+
+        public URLPrinter(List<UrlProvider> hd) {
             this.hd = hd;
         }
 
         @Override
         public void runIo() throws IOException {
-            LOGGER.info("URL: {}", hd.getUrl());
+            switch (hd.size()) {
+                case 0:
+                    LOGGER.warn("No URL provided");
+                    break;
+                case 1:
+                    LOGGER.info("URL: {}", hd.get(0).getUrl());
+                    break;
+                default:
+                    LOGGER.info("URLs:");
+                    for (UrlProvider p : hd) {
+                        LOGGER.info("* " + p.getUrl());
+                    }
+            }
         }
     }
 
